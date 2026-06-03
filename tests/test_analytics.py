@@ -1,4 +1,4 @@
-from habit_tracker.analytics import list_all_habits, list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit
+from habit_tracker.analytics import list_all_habits, list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
 from habit_tracker.habit import Habit
 from datetime import datetime
 
@@ -39,3 +39,32 @@ def test_longest_streak_for_daily_habit():
     result = list_longest_streak_for_given_habit(habit)
 
     assert result == 3
+
+def test_longest_streak_for_weekly_habit():
+    """tests the logic for calculating the longest streak for a weekly habit."""
+    habit = Habit("Go to the gym", "weekly")
+
+    habit.complete(datetime(2025, 1, 1))
+    habit.complete(datetime(2025, 1, 8))
+    habit.complete(datetime(2025, 1, 15))
+
+    result = list_longest_streak_for_given_habit(habit)
+
+    assert result == 3
+
+def test_longest_streak_of_all_habits():
+    """tests the logic for calculating the longest streak for all tracked habits."""
+    habit1 = Habit("Drink water", "daily")
+    habit2 = Habit("Go to the gym", "weekly")
+
+    habit1.complete(datetime(2025, 1, 1))
+    habit1.complete(datetime(2025, 1, 2))
+    habit1.complete(datetime(2025, 1, 3))
+
+    habit2.complete(datetime(2025, 1, 1))
+    habit2.complete(datetime(2025, 1, 8))
+    habit2.complete(datetime(2025, 1, 15))
+    habit2.complete(datetime(2025, 1, 22))
+
+    result = return_longest_streak_of_all_habits([habit1, habit2])
+    assert result == 4

@@ -1,4 +1,5 @@
-from datetime import timedelta
+from calendar import week
+from datetime import date, timedelta
 
 def list_all_habits(habits):
     """This function returns all habits currenty tracked."""
@@ -21,9 +22,17 @@ def list_longest_streak_for_given_habit(habit):
     completed_periods = []
 
     for completed_at in habit.completions:
-        completed_periods.append(completed_at.date())
-        """completed periods are added to the empty list complete_periods"""
 
+        if habit.is_daily():
+            """If loop checks whether habit has daily periodicity"""
+            completed_periods.append(completed_at.date())
+            """completed periods are added to the empty list complete_periods"""
+        else:
+            """If the habit does not have daily periodicity, it must have weekly as that is the only other valid option"""
+            iso_year, iso_week, _ = completed_at.isocalendar()
+            week_start = date.fromisocalendar(iso_year, iso_week, 1)
+            completed_periods.append(week_start)
+            
     completed_periods = sorted(set(completed_periods))
     """removes duplicates and sortes the list"""
 
@@ -35,22 +44,41 @@ def list_longest_streak_for_given_habit(habit):
     longest_streak = 1
 
     for i in range(1, len(completed_periods)):
-        """sets up a for loop, to loop over completed_periods ranging from 1 to the length of the list """
-        previous_day = completed_periods[i - 1]
-        current_day = completed_periods[i]
+        """for loop that iterates over all completed periods"""
+        previous_period = completed_periods[i - 1]
+        current_period = completed_periods[i]
 
-
-
-        if current_day == previous_day + timedelta(days=1):
-            current_streak += 1
-            """If two consecutive completons occur side by side, streak increases by 1"""
+        if habit.is_daily():
+            """Calculates the expected next period for habits with daily periodicity"""
+            expected_next_period = previous_period + timedelta(days=1)
         else:
-            current_streak = 1
-            """Otherwise streak resets to 1"""
+            """Calculates the expected next period for habits with weekly periodicity"""
+            expected_next_period = previous_period + timedelta(weeks=1)
 
-        
+        if current_period == expected_next_period:
+            """If the current period matches the expected next period, increment the current streak"""
+            current_streak += 1
+        else:
+            """Otherwise, reset the current streak"""
+            current_streak = 1
+
         if current_streak > longest_streak:
+            """If the current streak is greater than the longest streak, update the longest streak"""
             longest_streak = current_streak
-            """If the current streak is longer than longest_streak, longest_streak is set equal to current_streak"""
-    
+
     return longest_streak
+
+def return_longest_streak_of_all_habits(habits):
+    """This function returns the longest streak of all habits currently tracked."""
+
+    longest_streaks = {}
+
+    for habit in habits:
+        """for loop that iterates over all habits and calculates the longest streak for each habit, storing the result in a dictionary."""
+        longest_streaks[habit.name] = list_longest_streak_for_given_habit(habit)
+
+    if len(habits) == 0:
+        """Checks if the habit list is empty and returns 0 if it is, as there are no habits to calculate streaks for."""
+        return 0
+    
+    return max(longest_streaks.values())
