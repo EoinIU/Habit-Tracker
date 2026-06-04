@@ -18,6 +18,8 @@ class Habit:
         """Periodicity attribute"""
         self.completions = []
         """Completions attribute, which is a list of datetimes when the habit was completed. This will be used to calculate streaks."""
+        self.created_at = datetime.now()
+        """Created at attribute, which is the datetime when the habit was created."""
 
     """Methods"""
     def complete(self, completed_at=None):
@@ -26,6 +28,7 @@ class Habit:
             completed_at = datetime.now()
             
         self.completions.append(completed_at)
+
     def is_daily(self):
         """Returns true if this habit has daily periodicity, or false if the periodicity is weekly (the only other valid option for periodicity)"""
         return self.periodicity == "daily"

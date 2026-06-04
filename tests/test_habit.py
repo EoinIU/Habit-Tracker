@@ -1,13 +1,16 @@
+from datetime import datetime
+
 import pytest
 from habit_tracker.habit import Habit
 
 def test_habit_can_be_created():
-    """Tests if a habit can be succesfully created"""
+    """Tests if a habit can be succesfully created and that its attributes are correctly set"""
 
     habit = Habit("Drink water", "daily")
 
     assert habit.name == "Drink water"
     assert habit.periodicity == "daily"
+    assert isinstance(habit.created_at, datetime)
 
 def test_invalid_periodicity_raises_error():
     """Tests whether an invalid periodicity (anything other than daily or weekly) raises an error"""
