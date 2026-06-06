@@ -51,3 +51,32 @@ def test_longest_streak_command(tmp_path):
 
     assert result.exit_code == 0
     assert "Longest streak: 3 days for Drink water" in result.output
+
+def test_longest_streak_for_habit_command(tmp_path):
+    database_path = tmp_path / "test_habits.db"
+    cli.DATABASE_NAME = database_path
+
+    initialise_database(database_path)
+
+    habit = Habit("Drink water", "daily")
+    habit.complete(datetime(2025, 1, 1))
+    habit.complete(datetime(2025, 1, 2))
+    habit.complete(datetime(2025, 1, 3))
+
+    save_habit(habit, database_path)
+
+    result = runner.invoke(app, ["longest-streak-for-habit", "Drink water"])
+
+    assert result.exit_code == 0
+    assert "Longest streak for Drink water: 3 days" in result.output
+
+def test_longest_streak_for_unknown_habit_command(tmp_path):
+    database_path = tmp_path / "test_habits.db"
+    cli.DATABASE_NAME = database_path
+
+    initialise_database(database_path)
+
+    result = runner.invoke(app, ["longest-streak-for-habit", "Unknown habit"])
+
+    assert result.exit_code == 0
+    assert "Habit 'Unknown habit' not found." in result.output

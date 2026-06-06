@@ -1,6 +1,6 @@
 import typer
 
-from habit_tracker.analytics import list_all_habits_with_given_periodicity, return_longest_streak_of_all_habits
+from habit_tracker.analytics import list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
 from habit_tracker.storage import initialise_database, load_habits
 
 DATABASE_NAME = "habits.db" 
@@ -51,6 +51,23 @@ def longest_streak():
     streak, unit, habit_name = return_longest_streak_of_all_habits(habits)
     
     typer.echo(f"Longest streak: {streak} {unit} for {habit_name}")
+
+@app.command()
+def longest_streak_for_habit(habit_name: str):
+    """Lists the longest streak for a given habit."""
+    initialise_database(DATABASE_NAME)
+    habits = load_habits(DATABASE_NAME)
+
+    habit = next((h for h in habits if h.name == habit_name), None)
+
+    if habit is None:
+        typer.echo(f"Habit '{habit_name}' not found.")
+        return
+
+    streak = list_longest_streak_for_given_habit(habit)
+    unit = "days" if habit.is_daily() else "weeks"
+
+    typer.echo(f"Longest streak for {habit.name}: {streak} {unit}")
 
 if __name__ == "__main__":
     """Runs the CLI application."""
