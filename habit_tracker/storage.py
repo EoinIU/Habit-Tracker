@@ -84,3 +84,37 @@ def load_habits(database_name="habits.db"):
 
     connection.close()
     return habits
+
+def add_completion(habit_id, completed_at=None, database_name="habits.db"):
+    """Add a completion for a habit in the database. If no datetime value is provided, the current time and date will be used."""
+    if completed_at is None:
+        completed_at = datetime.now()
+
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
+    
+
+    cursor.execute("""
+        INSERT INTO completions (habit_id, completed_at) VALUES (?, ?)
+    """, (habit_id, completed_at.isoformat()))
+
+    completion_id = cursor.lastrowid
+
+    connection.commit()
+    connection.close()
+
+    return completion_id
+
+def delete_habit(habit_id, database_name="habits.db"):
+    """Delete a habit and its completions from the database."""
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
+
+    cursor.execute("DELETE FROM completions WHERE habit_id = ?", (habit_id,))
+    """Deletes all completions linked to the habit via the habit_id foreign key."""
+
+    cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
+    """Deletes the habit from the habits table."""
+
+    connection.commit()
+    connection.close()
