@@ -69,16 +69,22 @@ def list_longest_streak_for_given_habit(habit):
     return longest_streak
 
 def return_longest_streak_of_all_habits(habits):
-    """This function returns the longest streak of all habits currently tracked."""
-
-    longest_streaks = {}
-
-    for habit in habits:
-        """for loop that iterates over all habits and calculates the longest streak for each habit, storing the result in a dictionary."""
-        longest_streaks[habit.name] = list_longest_streak_for_given_habit(habit)
+    """Return the longest streak, unit, and habit name across all tracked habits."""
 
     if len(habits) == 0:
-        """Checks if the habit list is empty and returns 0 if it is, as there are no habits to calculate streaks for."""
-        return 0
-    
-    return max(longest_streaks.values())
+        return 0, None, None
+
+    best_streak = 0
+    best_unit = None
+    best_habit_name = None
+
+    for habit in habits:
+        streak = list_longest_streak_for_given_habit(habit)
+        unit = "days" if habit.is_daily() else "weeks"
+
+        if streak > best_streak:
+            best_streak = streak
+            best_unit = unit
+            best_habit_name = habit.name
+
+    return best_streak, best_unit, best_habit_name

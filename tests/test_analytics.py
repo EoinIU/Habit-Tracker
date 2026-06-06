@@ -67,4 +67,4 @@ def test_longest_streak_of_all_habits():
     habit2.complete(datetime(2025, 1, 22))
 
     result = return_longest_streak_of_all_habits([habit1, habit2])
-    assert result == 4
+    assert result == (4, "weeks", "Go to the gym")
