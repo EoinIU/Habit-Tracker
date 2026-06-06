@@ -6,9 +6,11 @@ from habit_tracker.habit import Habit
 
 def initialise_database(database_name="habits.db"):
     """Creates the database tables if they do not already exist."""
+    #Connects to the SQLite database specified by database_name.
     connection = sqlite3.connect(database_name)
     cursor = connection.cursor()
 
+    #Creates the habits table if it does not already exist.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS habits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,6 +21,7 @@ def initialise_database(database_name="habits.db"):
     """)
     """Creates the habits table if it does not already exist."""
 
+    #Creates the completions table if it does not already exist, with a foreign key linking each completion to a habit in the habits table.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS completions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,41 +32,52 @@ def initialise_database(database_name="habits.db"):
     """)
     """Creates the completions table if it does not already exist."""
 
+    #Commits the changes to the database and closes the connection.
     connection.commit()
     connection.close()
 
 def save_habit(habit, database_name="habits.db"):
     """Save a habit to the database."""
+    #Connects to the SQLite database specified by database_name.
     connection = sqlite3.connect(database_name)
     cursor = connection.cursor()
 
+    #Saves the habit's name, periodicity, and created_at attributes to the habits table.
     cursor.execute("""
         INSERT INTO habits (name, periodicity, created_at) VALUES (?, ?, ?)
     """, (habit.name, habit.periodicity, habit.created_at.isoformat()))
-    """Saves the habit's name, periodicity and created_at attributes to the habits table."""
 
+
+    #Retrieves the id of the newly inserted habit.
     habit_id = cursor.lastrowid
 
+    #Saves each completion of the habit to the completions table, linking it to the habit via the habit_id foreign key.
     for completion in habit.completions:
         """Saves each completion of the habit to the completions table, linking it to the habit via the habit_id foreign key."""
         cursor.execute("""
             INSERT INTO completions (habit_id, completed_at) VALUES (?, ?)
         """, (habit_id, completion.isoformat()))
 
+    #Commits the changes to the database and closes the connection, then returns the id of the newly inserted habit.
     connection.commit()
     connection.close()
     return habit_id
 
 def load_habits(database_name="habits.db"):
     """Load all habits and their completions from the database."""
+    #Connects to the SQLite database specified by database_name.
     connection = sqlite3.connect(database_name)
     cursor = connection.cursor()
 
+    #Retrieves all habits from the habits table, including their id, name, periodicity, and created_at attributes.
     cursor.execute("SELECT id, name, periodicity, created_at FROM habits")
     habit_rows = cursor.fetchall()
 
+    #Initializes an empty list to store the Habit objects that will be created from the database rows.
     habits = []
 
+    #Iterates over the rows retrieved from the habits table and creates a Habit object for each habit, populating 
+    #its completions list with the corresponding completions from the completions table.
     for habit_id, name, periodicity, created_at in habit_rows:
         """Creates a Habit object for each habit in the database and populates its completions list with the corresponding completions from the completions table."""
         habit = Habit(name, periodicity)
@@ -74,32 +88,41 @@ def load_habits(database_name="habits.db"):
              (habit_id,)
         )
 
+        #Fetches all completions for this habit from the completions table and appends them to the habit's completions 
+        # list after converting the completed_at string back to a datetime object.
         completion_rows = cursor.fetchall()
 
+        #Iterates over the rows retrieved from the completions table for this habit and appends each completion to the habit's 
+        # completions list after converting the completed_at string back to a datetime object.
         for completion_row in completion_rows:
             completed_at = completion_row[0]
             habit.completions.append(datetime.fromisoformat(completed_at))
 
         habits.append(habit)
 
+    #Closes the database connection and returns the list of Habit objects loaded from the database.
     connection.close()
     return habits
 
 def add_completion(habit_id, completed_at=None, database_name="habits.db"):
     """Add a completion for a habit in the database. If no datetime value is provided, the current time and date will be used."""
+    #If completed_at is not provided, it defaults to the current date and time.
     if completed_at is None:
         completed_at = datetime.now()
 
+    #Connects to the SQLite database specified by database_name.
     connection = sqlite3.connect(database_name)
     cursor = connection.cursor()
     
-
+    #Inserts a new completion into the completions table with the specified habit_id and completed_at datetime.
     cursor.execute("""
         INSERT INTO completions (habit_id, completed_at) VALUES (?, ?)
     """, (habit_id, completed_at.isoformat()))
 
+    #Retrieves the id of the newly inserted completion.
     completion_id = cursor.lastrowid
 
+    #Commits the changes to the database and closes the connection, then returns the id of the newly inserted completion.
     connection.commit()
     connection.close()
 
@@ -107,14 +130,18 @@ def add_completion(habit_id, completed_at=None, database_name="habits.db"):
 
 def delete_habit(habit_id, database_name="habits.db"):
     """Delete a habit and its completions from the database."""
+    #Connects to the SQLite database specified by database_name.    
     connection = sqlite3.connect(database_name)
     cursor = connection.cursor()
 
+    #Deletes all completions for this habit from the completions table first, as they are linked by a foreign key.
     cursor.execute("DELETE FROM completions WHERE habit_id = ?", (habit_id,))
-    """Deletes all completions linked to the habit via the habit_id foreign key."""
 
+
+    #Deletes the habit itself from the habits table.
     cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
-    """Deletes the habit from the habits table."""
 
+
+    #Commits the changes to the database and closes the connection.
     connection.commit()
     connection.close()
