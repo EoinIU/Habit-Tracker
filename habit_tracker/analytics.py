@@ -2,8 +2,8 @@ from calendar import week
 from datetime import date, timedelta
 
 def list_all_habits(habits):
-    """This function returns all habits currenty tracked."""
-    return habits
+    """Return names and periodicities for all currently tracked habits."""
+    return [(habit.name, habit.periodicity) for habit in habits]
 
 def list_all_habits_with_given_periodicity(habits, periodicity):
     """This function lists all habits with a given periodicity which is passed to the function as an argument."""

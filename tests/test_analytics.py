@@ -13,8 +13,8 @@ def test_list_all_habits():
     #Calls the function to list all habits and assigns the result to the variable result.
     result = list_all_habits(habits_list)
 
-    #Checks that the result is a list containing both habit1 and habit2, which are the two habits in the habits_list.
-    assert result == [habit1, habit2] 
+    #Checks that the result contains the name and periodicity of each habit.
+    assert result == [("Drink water", "daily"), ("Gym", "weekly")]
 
 def test_all_habits_daily():
     """Tests if all daily habits can be listed."""

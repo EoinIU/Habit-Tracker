@@ -1,8 +1,9 @@
 import typer
-from habit_tracker.analytics import list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
+from habit_tracker.analytics import list_all_habits, list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
 from habit_tracker.storage import initialise_database, load_habits
 
 DATABASE_NAME = "habits.db" 
+
 
 # The name of the database file where habits and their completions are stored.
 app = typer.Typer()
@@ -12,14 +13,17 @@ def list_habits():
     """Lists all tracked habits."""
     initialise_database(DATABASE_NAME)
     habits = load_habits(DATABASE_NAME)
+    habit_list = list_all_habits(habits)
 
-    # If there are no habits tracked yet, a message is printed to the user.
-    if len(habits) == 0:
-            typer.echo("No habits tracked yet.")
+    #If there are no habits tracked yet, a message is printed to the user.
+    if len(habit_list) == 0:
+        typer.echo("No habits tracked yet.")
+        return
 
-    # Prints the name and periodicity of each habit in the database.
-    for habit in habits:
-        typer.echo(f"{habit.name} ({habit.periodicity})")
+    #Prints the name and periodicity of each habit in the database, numbered in a list format.
+    for index, habit in enumerate(habit_list, start=1):
+        name, periodicity = habit
+        typer.echo(f"{index}. {name} ({periodicity})")
 
 @app.command()
 def list_habits_with_given_periodicity(periodicity: str):
@@ -68,14 +72,45 @@ def longest_streak_for_habit(habit_name: str):
         typer.echo(f"Habit '{habit_name}' not found.")
         return
 
-    # assigns the longest streak for the given habit to the variable streak and uses the is_daily method to determine whether the unit should be days or weeks, which is assigned to the variable unit.
+    #Assigns the longest streak for the given habit to the variable streak and uses the is_daily method to determine whether the unit should be days or weeks, which is assigned to the variable unit.
     streak = list_longest_streak_for_given_habit(habit)
     unit = "days" if habit.is_daily() else "weeks"
 
     #Prints the longest streak for the given habit, including the habit name, streak, and unit.
     typer.echo(f"Longest streak for {habit.name}: {streak} {unit}")
 
+@app.command()
+def main_menu():
+    """Displays the main menu of the habit tracker application."""
+    while True:
+        typer.echo("Welcome to the Habit Tracker!")
+        typer.echo("----------------------------------")
+        typer.echo("1. List all habits")
+        typer.echo("2. Add habit")
+        typer.echo("3. Complete habit")
+        typer.echo("4. Delete habit")
+        typer.echo("5. Analytics")
+        typer.echo("6. Exit")
+        typer.echo("----------------------------------")
+        choice = typer.prompt("Please choose an option: (e.g., type '1' to list all habits)")
+        if choice == "1":
+            list_habits()
+        elif choice == "2":
+            random_assignment = 1 
+        elif choice == "3":
+            random_assignment = 1 
+        elif choice == "4":
+            random_assignment = 1 
+        elif choice == "5":
+            random_assignment = 1 
+        elif choice == "6":
+            typer.echo("Goodbye!")
+            break
+        else:
+            typer.echo("Invalid option. Please try again.")
+
+
 # Runs the CLI application when the script is executed directly.
 if __name__ == "__main__":
-    """Runs the CLI application."""
+
     app()
