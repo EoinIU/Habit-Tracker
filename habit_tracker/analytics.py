@@ -3,6 +3,7 @@ from datetime import date, timedelta
 
 def list_all_habits(habits):
     """Return names and periodicities for all currently tracked habits."""
+    #Returns a list of tuples containing the name and periodicity of each habit in the habits list.
     return [(habit.name, habit.periodicity) for habit in habits]
 
 def list_all_habits_with_given_periodicity(habits, periodicity):

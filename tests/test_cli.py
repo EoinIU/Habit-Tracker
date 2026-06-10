@@ -3,7 +3,7 @@ from typer.testing import CliRunner
 from habit_tracker.cli import app
 import habit_tracker.cli as cli
 from habit_tracker.habit import Habit
-from habit_tracker.storage import initialise_database, save_habit
+from habit_tracker.storage import initialise_database, load_habits, save_habit
 
 # The CliRunner from the Typer librarywill be used to invoke the CLI commands in the tests and check their output.
 runner = CliRunner()
@@ -110,3 +110,26 @@ def test_longest_streak_for_unknown_habit_command(tmp_path):
     #Checks that the command exits with a status code of 0 (indicating success) and that the output contains "Habit 'Unknown habit' not found.".
     assert result.exit_code == 0
     assert "Habit 'Unknown habit' not found." in result.output
+
+def test_add_habit_menu_option_adds_new_habit(tmp_path):
+    """Test that the add-habit CLI command saves a new habit."""
+    #Creates a temporary test database and point the CLI to it.
+    database_path = tmp_path / "test_habits.db"
+    cli.DATABASE_NAME = database_path
+
+    #Simulates the user entering a habit name and periodicity.
+    result = runner.invoke(
+        app,
+        ["add-habit"],
+        input="Drink water\ndaily\n"
+    )
+
+    #Checks that the command ran successfully and showed confirmation.
+    assert result.exit_code == 0
+    assert "Habit added: Drink water (daily)" in result.output
+
+    #Loads habits from the test database and check the new habit was saved.
+    habits = load_habits(database_path)
+    assert len(habits) == 1
+    assert habits[0].name == "Drink water"
+    assert habits[0].periodicity == "daily"

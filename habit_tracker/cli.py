@@ -1,6 +1,7 @@
 import typer
 from habit_tracker.analytics import list_all_habits, list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
-from habit_tracker.storage import initialise_database, load_habits
+from habit_tracker.habit import Habit
+from habit_tracker.storage import initialise_database, load_habits, save_habit
 
 DATABASE_NAME = "habits.db" 
 
@@ -24,6 +25,39 @@ def list_habits():
     for index, habit in enumerate(habit_list, start=1):
         name, periodicity = habit
         typer.echo(f"{index}. {name} ({periodicity})")
+
+@app.command()
+def add_habit():
+    """Adds a new habit to be tracked."""
+    #Initialises the database
+    initialise_database(DATABASE_NAME)
+
+    #Asks the user for the name of the habit and the periodicity
+    habit_name = typer.prompt("Please enter the name of the habit:")
+    habit_periodicity = typer.prompt("Please enter the periodicity of the habit (daily/weekly):")
+
+    #Loads the currently tracked habits from the database
+    habits = load_habits(DATABASE_NAME)
+
+    #This for loop iterates through each of the habits loaded from the database and checks if the habit name provided by the customer already exists
+    for habit in habits:
+        if habit.name == habit_name:
+            typer.echo(f"Habit already exists: {habit_name}")
+            return
+        
+    #Tries creating a habit object with the name and periodicity provided byt the user
+    try:
+        habit_to_save = Habit(habit_name, habit_periodicity)
+    except ValueError as error:
+        typer.echo(error)
+        return
+
+    #Saves the habit to the database
+    save_habit(habit_to_save, DATABASE_NAME)
+
+    #Shows confirmation message to the user
+    typer.echo(f"Habit added: {habit_name} ({habit_periodicity})")
+    
 
 @app.command()
 def list_habits_with_given_periodicity(periodicity: str):
@@ -83,6 +117,9 @@ def longest_streak_for_habit(habit_name: str):
 def main_menu():
     """Displays the main menu of the habit tracker application."""
     while True:
+        typer.echo("")
+        typer.echo("")
+        typer.echo("")
         typer.echo("Welcome to the Habit Tracker!")
         typer.echo("----------------------------------")
         typer.echo("1. List all habits")
@@ -93,6 +130,9 @@ def main_menu():
         typer.echo("6. Exit")
         typer.echo("----------------------------------")
         choice = typer.prompt("Please choose an option: (e.g., type '1' to list all habits)")
+        typer.echo("")
+        typer.echo("")
+        typer.echo("")
         if choice == "1":
             list_habits()
         elif choice == "2":
