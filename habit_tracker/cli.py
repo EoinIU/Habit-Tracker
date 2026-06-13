@@ -15,12 +15,18 @@ def list_habits():
     initialise_database(DATABASE_NAME)
     habits = load_habits(DATABASE_NAME)
     habit_list = list_all_habits(habits)
+    
+    #Prints an empty line for formatting purposes
+    typer.echo("")
 
     #If there are no habits tracked yet, a message is printed to the user.
     if len(habit_list) == 0:
         typer.echo("No habits tracked yet.")
         return
 
+    #Prints title and empty line 
+    typer.echo("Currently tracked habits:")
+    typer.echo("")
     #Prints the name and periodicity of each habit in the database, numbered in a list format.
     for index, habit in enumerate(habit_list, start=1):
         name, periodicity = habit
@@ -33,6 +39,7 @@ def add_habit():
     initialise_database(DATABASE_NAME)
 
     #Asks the user for the name of the habit and the periodicity
+    typer.echo("")
     habit_name = typer.prompt("Please enter the name of the habit:")
     habit_periodicity = typer.prompt("Please enter the periodicity of the habit (daily/weekly):")
 
@@ -68,6 +75,7 @@ def complete_habit():
 
     #If there are no habits tracked yet then no habit can be completed and a message is printed to the user.
     if len(habits) == 0:
+        typer.echo("")
         typer.echo("No habits tracked yet.")
         return
 
@@ -76,6 +84,7 @@ def complete_habit():
         typer.echo(f"{index}. {habit.name} ({habit.periodicity})")
 
     #Asks the user to enter the number of the habit they wish to complete
+    typer.echo("")
     entered_number = typer.prompt("Please enter the number of the habit you wish to complete, e.g., '1'")
 
     #Checks if the users input is an integer
@@ -109,6 +118,7 @@ def delete_a_habit():
 
     #If there are no habits tracked yet then no habit can be deleted and so a message is printed to the user.
     if len(habits) == 0:
+        typer.echo("")
         typer.echo("No habits tracked yet.")
         return
 
@@ -117,17 +127,20 @@ def delete_a_habit():
         typer.echo(f"{index}. {habit.name} ({habit.periodicity})")
 
     #Asks the user to enter the number of the habit they wish to delete
+    typer.echo("")
     entered_number = typer.prompt("Please enter the number of the habit you wish to delete, e.g., '1'")
 
     #Checks if the users input is an integer
     try:
         selected_number = int(entered_number)
     except ValueError:
+        typer.echo("")
         typer.echo("Please enter a valid number.")
         return
 
     #Checks that the users inputted number is within the given range of habits
     if selected_number < 1 or selected_number > len(habits):
+        typer.echo("")
         typer.echo("Invalid habit number.")
         return
     
@@ -149,21 +162,39 @@ def delete_a_habit():
     
 
 @app.command()
-def list_habits_with_given_periodicity(periodicity: str):
+def list_habits_with_given_periodicity():
     """Lists all tracked habits with a given periodicity."""
+    #Initialise the database
     initialise_database(DATABASE_NAME)
     habits = load_habits(DATABASE_NAME)
+    #Sets the variable choice equal to the lower case version of the users unput
+    typer.echo("")
+    choice = typer.prompt("Please type your chosen periodicity (daily/weekly)").lower()
 
-    filtered_habits = list_all_habits_with_given_periodicity(habits, periodicity)
-
-    # If there are no habits with the given periodicity, a message is printed to the user.
-    if len(filtered_habits) == 0:
-        typer.echo(f"No {periodicity} habits tracked yet.")
+    #Checks whether the user's input is either 'daily' or 'weekly'
+    if choice not in ["daily", "weekly"]:
+        typer.echo("Please enter either daily or weekly.")
         return
 
-    for habit in filtered_habits:
-        #Prints the name and periodicity of each habit in the database with the given periodicity.
-        typer.echo(f"{habit.name} ({habit.periodicity})")
+    #Assigns the variable matching_habits to the result of the return_all_habits_with_given_periodicity function from the analytics module
+    matching_habits = list_all_habits_with_given_periodicity(habits, choice)
+
+    #Checks if matching_habits is empty and lets the user know
+    if len(matching_habits) == 0:
+        typer.echo(f"No {choice} habits tracked yet.")
+        return
+
+    #Prints a title and empty lines for formatting
+    typer.echo("")
+    typer.echo(f"Habits with {choice} periodicity:")
+    typer.echo("")
+
+    #A for loop which lists each item in matching_habits for the user
+    for index, habit in enumerate(matching_habits, start=1):
+        typer.echo(f"{index}. {habit.name} ({habit.periodicity})")
+
+
+
 
 @app.command()
 def longest_streak():
@@ -171,12 +202,12 @@ def longest_streak():
     initialise_database(DATABASE_NAME)
     habits = load_habits(DATABASE_NAME)
 
-    # If there are no habits tracked yet, a message is printed to the user.
+    #If there are no habits tracked yet, a message is printed to the user.
     if len(habits) == 0:
         typer.echo("No habits tracked yet.")
         return
 
-    # Assigns the longest streak, unit, and habit name across all tracked habits to the variables streak, unit, and habit_name respectively.
+    #Assigns the longest streak, unit, and habit name across all tracked habits to the variables streak, unit, and habit_name respectively.
     streak, unit, habit_name = return_longest_streak_of_all_habits(habits)
     
     # 
@@ -190,7 +221,7 @@ def longest_streak_for_habit(habit_name: str):
 
     habit = next((h for h in habits if h.name == habit_name), None)
 
-    # If the habit with the given name is not found in the database, a message is printed to the user.
+    #If the habit with the given name is not found in the database, a message is printed to the user.
     if habit is None:
         typer.echo(f"Habit '{habit_name}' not found.")
         return
@@ -208,7 +239,6 @@ def main_menu():
     while True:
         typer.echo("")
         typer.echo("")
-        typer.echo("")
         typer.echo("Habit Tracker Menu")
         typer.echo("----------------------------------")
         typer.echo("1. List all habits")
@@ -218,10 +248,9 @@ def main_menu():
         typer.echo("5. Analytics")
         typer.echo("6. Exit")
         typer.echo("----------------------------------")
+        typer.echo("")
+        typer.echo("")
         choice = typer.prompt("Please choose an option: (e.g., type '1' to list all habits)")
-        typer.echo("")
-        typer.echo("")
-        typer.echo("")
         if choice == "1":
             list_habits()
         elif choice == "2":
@@ -229,17 +258,46 @@ def main_menu():
         elif choice == "3":
             complete_habit()
         elif choice == "4":
-            random_assignment = 1 
+            delete_a_habit() 
         elif choice == "5":
-            random_assignment = 1 
+            analytics_menu()
         elif choice == "6":
             typer.echo("Goodbye!")
             break
         else:
             typer.echo("Invalid option. Please try again.")
 
+@app.command()
+def analytics_menu():
+    """Displays the analytics sub-menu"""
+    while True:
+        typer.echo("")
+        typer.echo("")
+        typer.echo(" Habit Tracker Analytics")
+        typer.echo("----------------------------------")
+        typer.echo("1. List all habits")
+        typer.echo("2. List all habits with a given periodicity")
+        typer.echo("3. List longest streak for a given habit")
+        typer.echo("4. List longest streak of all habits")
+        typer.echo("5. Exit to main menu")
+        typer.echo("----------------------------------")
+        typer.echo("")
+        typer.echo("")
+        choice = typer.prompt("Please choose an option: (e.g., type '1' to list all habits)")
 
-# Runs the CLI application when the script is executed directly.
+        if choice == "1":
+            list_habits() 
+        elif choice == "2":
+            list_habits_with_given_periodicity()
+        elif choice == "3":
+            random_assignment = 1 
+        elif choice == "4":
+            random_assignment = 1 
+        elif choice == "5":
+            main_menu()
+        else:
+            typer.echo("Invalid option. Please try again.")
+#Runs the CLI application when the script is executed directly.
 if __name__ == "__main__":
 
     app()

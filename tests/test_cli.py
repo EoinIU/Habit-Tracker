@@ -37,13 +37,17 @@ def test_list_habits_with_given_periodicity(tmp_path):
 
     #Invokes the CLI command to list habits with daily periodicity and checks that the output contains 
     # the expected habit with daily periodicity and does not contain the habit with weekly periodicity.
-    result = runner.invoke(app, ["list-habits-with-given-periodicity", "daily"])
+    result = runner.invoke(
+        app,
+        ["list-habits-with-given-periodicity"],
+        input="daily\n"
+    )
 
     #Checks that the command exits with a status code of 0 (indicating success) and that the output contains 
     #"Drink water (daily)" and does not contain "Gym (weekly)", which is the expected output when filtering for daily habits.
     assert result.exit_code == 0
-    assert "Drink water (daily)" in result.output
-    assert "Gym (weekly)" not in result.output
+    assert "1. Drink water (daily)" in result.output
+    assert "1. Gym (weekly)" not in result.output
 
 def test_longest_streak_command(tmp_path):
     """Tests whether the CLI command to list the longest streak across all tracked habits correctly identifies and displays the longest streak."""
