@@ -159,3 +159,29 @@ def test_complete_habit_command_adds_completion(tmp_path):
     #Reloads the habit and check that one completion was saved.
     loaded_habits = load_habits(database_path)
     assert len(loaded_habits[0].completions) == 1
+
+def test_delete_a_habit_command_deletes_selected_habit(tmp_path):
+    """Tests that the delete-a-habit command deletes the selected habit."""
+    #Creates a temporary database and point the CLI to it.
+    database_path = tmp_path / "test_habits.db"
+    cli.DATABASE_NAME = database_path
+
+    #Adds one habit to the test database.
+    initialise_database(database_path)
+    habit = Habit("Drink water", "daily")
+    save_habit(habit, database_path)
+
+    #Simulates selecting habit number 1 and confirming deletion with y.
+    result = runner.invoke(
+        app,
+        ["delete-a-habit"],
+        input="1\ny\n"
+    )
+
+    #Checks that the command completed successfully and showed confirmation.
+    assert result.exit_code == 0
+    assert "Drink water has been deleted" in result.output
+
+    #Loads habits again and check that the habit was deleted.
+    loaded_habits = load_habits(database_path)
+    assert len(loaded_habits) == 0
