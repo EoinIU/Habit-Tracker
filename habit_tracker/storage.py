@@ -82,6 +82,7 @@ def load_habits(database_name="habits.db"):
         """Creates a Habit object for each habit in the database and populates its completions list with the corresponding completions from the completions table."""
         habit = Habit(name, periodicity)
         habit.created_at = datetime.fromisoformat(created_at)
+        habit.id = habit_id
 
         cursor.execute(
             "SELECT completed_at FROM completions WHERE habit_id = ?",

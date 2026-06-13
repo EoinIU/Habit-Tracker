@@ -133,3 +133,29 @@ def test_add_habit_menu_option_adds_new_habit(tmp_path):
     assert len(habits) == 1
     assert habits[0].name == "Drink water"
     assert habits[0].periodicity == "daily"
+
+def test_complete_habit_command_adds_completion(tmp_path):
+    """Test that the complete-habit command records a completion for a selected habit."""
+    #Creates a temporary database and point the CLI to it.
+    database_path = tmp_path / "test_habits.db"
+    cli.DATABASE_NAME = database_path
+
+    #Adds one habit to the test database.
+    initialise_database(database_path)
+    habit = Habit("Drink water", "daily")
+    save_habit(habit, database_path)
+
+    #Simulates the user selecting habit number 1.
+    result = runner.invoke(
+        app,
+        ["complete-habit"],
+        input="1\n"
+    )
+
+    #Checks the command completed successfully.
+    assert result.exit_code == 0
+    assert "Marked complete: Drink water" in result.output
+
+    #Reloads the habit and check that one completion was saved.
+    loaded_habits = load_habits(database_path)
+    assert len(loaded_habits[0].completions) == 1

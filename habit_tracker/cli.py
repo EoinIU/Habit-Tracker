@@ -1,7 +1,7 @@
 import typer
 from habit_tracker.analytics import list_all_habits, list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
 from habit_tracker.habit import Habit
-from habit_tracker.storage import initialise_database, load_habits, save_habit
+from habit_tracker.storage import add_completion, initialise_database, load_habits, save_habit
 
 DATABASE_NAME = "habits.db" 
 
@@ -57,6 +57,47 @@ def add_habit():
 
     #Shows confirmation message to the user
     typer.echo(f"Habit added: {habit_name} ({habit_periodicity})")
+    
+@app.command()
+def complete_habit():
+    """Allows the user to mark a habit as complete"""
+    #Initialise the database
+    initialise_database(DATABASE_NAME)
+    #Sets the variable habits to the 
+    habits = load_habits(DATABASE_NAME)
+
+    #If there are no habits tracked yet then no habit can be completed and a message is printed to the user.
+    if len(habits) == 0:
+        typer.echo("No habits tracked yet.")
+        return
+
+    #Prints the name and periodicity of each habit in the database, numbered in a list format.
+    for index, habit in enumerate(habits, start=1):
+        typer.echo(f"{index}. {habit.name} ({habit.periodicity})")
+
+    #Asks the user to enter the number of the habit they wish to complete
+    entered_number = typer.prompt("Please enter the number of the habit you wish to complete, e.g., '1'")
+
+    #Checks if the users input is an integer
+    try:
+        selected_number = int(entered_number)
+    except ValueError:
+        typer.echo("Please enter a valid number.")
+        return
+
+    #Checks that the users inputted number is within the given range of habits
+    if selected_number < 1 or selected_number > len(habits):
+        typer.echo("Invalid habit number.")
+        return
+    
+    #Finds the ID of the habit the user wishes to complete
+    selected_habit = habits[selected_number - 1]
+
+    #Adds a completion
+    add_completion(selected_habit.id, database_name=DATABASE_NAME)
+
+    #Lets the user that the habit has been marked complete
+    typer.echo(f"Marked complete: {selected_habit.name}")
     
 
 @app.command()
@@ -120,7 +161,7 @@ def main_menu():
         typer.echo("")
         typer.echo("")
         typer.echo("")
-        typer.echo("Welcome to the Habit Tracker!")
+        typer.echo("Habit Tracker Menu")
         typer.echo("----------------------------------")
         typer.echo("1. List all habits")
         typer.echo("2. Add habit")
@@ -136,7 +177,7 @@ def main_menu():
         if choice == "1":
             list_habits()
         elif choice == "2":
-            random_assignment = 1 
+            add_habit()
         elif choice == "3":
             random_assignment = 1 
         elif choice == "4":
