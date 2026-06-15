@@ -210,7 +210,7 @@ def longest_streak():
     #Assigns the longest streak, unit, and habit name across all tracked habits to the variables streak, unit, and habit_name respectively.
     streak, unit, habit_name = return_longest_streak_of_all_habits(habits)
     
-    # 
+    #Presents longest streak to the user
     typer.echo(f"Longest streak: {streak} {unit} for {habit_name}")
 
 @app.command()
@@ -327,7 +327,7 @@ def analytics_menu():
         elif choice == "3":
             longest_streak_for_habit()
         elif choice == "4":
-            random_assignment = 1 
+            longest_streak()
         elif choice == "5":
             main_menu()
         else:
