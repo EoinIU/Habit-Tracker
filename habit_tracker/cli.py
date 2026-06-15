@@ -214,24 +214,55 @@ def longest_streak():
     typer.echo(f"Longest streak: {streak} {unit} for {habit_name}")
 
 @app.command()
-def longest_streak_for_habit(habit_name: str):
-    """Lists the longest streak for a given habit."""
+def longest_streak_for_habit():
+    """Shows the longest streak for a selected habit"""
+    #Initialise the database
     initialise_database(DATABASE_NAME)
+    #Sets the variable habits to the 
     habits = load_habits(DATABASE_NAME)
 
-    habit = next((h for h in habits if h.name == habit_name), None)
-
-    #If the habit with the given name is not found in the database, a message is printed to the user.
-    if habit is None:
-        typer.echo(f"Habit '{habit_name}' not found.")
+    #If there are no habits tracked yet then no streaks exist so a message is printed to the user.
+    if len(habits) == 0:
+        typer.echo("")
+        typer.echo("No habits tracked yet.")
         return
 
-    #Assigns the longest streak for the given habit to the variable streak and uses the is_daily method to determine whether the unit should be days or weeks, which is assigned to the variable unit.
-    streak = list_longest_streak_for_given_habit(habit)
-    unit = "days" if habit.is_daily() else "weeks"
+    #Prints the name of each habit in the database numbered in a list format.
+    for index, habit in enumerate(habits, start=1):
+        typer.echo(f"{index}. {habit.name}")
 
-    #Prints the longest streak for the given habit, including the habit name, streak, and unit.
-    typer.echo(f"Longest streak for {habit.name}: {streak} {unit}")
+    #Asks the user to enter the number of the habit they wish to see the longest streak for
+    typer.echo("")
+    entered_number = typer.prompt("Please enter the number of the habit you wish to see the longest for, e.g., '1'")
+
+    #Checks if the users input is an integer
+    try:
+        selected_number = int(entered_number)
+    except ValueError:
+        typer.echo("Please enter a valid number.")
+        return
+
+    #Checks that the users inputted number is within the given range of habits
+    if selected_number < 1 or selected_number > len(habits):
+        typer.echo("Invalid habit number.")
+        return
+    
+    #Finds the habit the user selected
+    selected_habit = habits[selected_number - 1]
+    streak = list_longest_streak_for_given_habit(selected_habit)
+
+    #Finds out the periodicity of the selected habit
+    unit = "days" if selected_habit.is_daily() else "weeks"
+
+    #Presesnts the longest streak to the user for their chosen habit
+    typer.echo("")
+    typer.echo(f"The longest streak for {selected_habit.name} is: {streak} {unit}")
+
+    #Allows the user to return to the main menu by pressing any key
+    return
+        
+
+
 
 @app.command()
 def main_menu():

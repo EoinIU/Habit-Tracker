@@ -74,46 +74,31 @@ def test_longest_streak_command(tmp_path):
     assert result.exit_code == 0
     assert "Longest streak: 3 days for Drink water" in result.output
 
-def test_longest_streak_for_habit_command(tmp_path):
-    """Tests whether the CLI command to list the longest streak for a given habit correctly identifies and displays the longest streak for that habit."""
-    #Sets the database name to a temporary file path to ensure that the tests do not interfere with the actual database used by the application.
+def test_longest_streak_for_habit_command_with_selection(tmp_path):
+    """Test that the longest-streak-for-habit command shows the streak for a selected habit."""
+    #Creates a temporary database and point the CLI to it.
     database_path = tmp_path / "test_habits.db"
     cli.DATABASE_NAME = database_path
 
-    #Initialises the database at the specified path.
+    #Adds one daily habit with a three-day streak.
     initialise_database(database_path)
-
-    #Creates a habit with daily periodicity and completes it for three consecutive days.
     habit = Habit("Drink water", "daily")
     habit.complete(datetime(2025, 1, 1))
     habit.complete(datetime(2025, 1, 2))
     habit.complete(datetime(2025, 1, 3))
-
-    #Saves the habit to the database.
     save_habit(habit, database_path)
 
-    #Invokes the CLI command to list the longest streak for the habit named "Drink water".
-    result = runner.invoke(app, ["longest-streak-for-habit", "Drink water"])
+    #Simulates selecting habit number 1, then pressing Enter to continue.
+    result = runner.invoke(
+        app,
+        ["longest-streak-for-habit"],
+        input="1\n"
+    )
 
-    #Checks that the command exits with a status code of 0 (indicating success) and that the output contains "Longest streak for Drink water: 3 days".
+    #Checks that the correct streak is shown.
     assert result.exit_code == 0
-    assert "Longest streak for Drink water: 3 days" in result.output
+    assert "The longest streak for Drink water is: 3 days" in result.output
 
-def test_longest_streak_for_unknown_habit_command(tmp_path):
-    """Tests whether the CLI command to list the longest streak for a given habit correctly handles the case when the specified habit is not found in the database."""
-    #Sets the database name to a temporary file path to ensure that the tests do not interfere with the actual database used by the application.
-    database_path = tmp_path / "test_habits.db"
-    cli.DATABASE_NAME = database_path
-
-    #Initialises the database at the specified paths.
-    initialise_database(database_path)
-
-    #Invokes the CLI command to list the longest streak for a habit named "Unknown habit", which does not exist in the database.
-    result = runner.invoke(app, ["longest-streak-for-habit", "Unknown habit"])
-
-    #Checks that the command exits with a status code of 0 (indicating success) and that the output contains "Habit 'Unknown habit' not found.".
-    assert result.exit_code == 0
-    assert "Habit 'Unknown habit' not found." in result.output
 
 def test_add_habit_menu_option_adds_new_habit(tmp_path):
     """Test that the add-habit CLI command saves a new habit."""
@@ -189,3 +174,4 @@ def test_delete_a_habit_command_deletes_selected_habit(tmp_path):
     #Loads habits again and check that the habit was deleted.
     loaded_habits = load_habits(database_path)
     assert len(loaded_habits) == 0
+
