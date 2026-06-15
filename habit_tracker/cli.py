@@ -227,13 +227,16 @@ def longest_streak_for_habit():
         typer.echo("No habits tracked yet.")
         return
 
+    #Ptints a title for formatting purposes
+    typer.echo("Tracked habits:")
+
     #Prints the name of each habit in the database numbered in a list format.
     for index, habit in enumerate(habits, start=1):
         typer.echo(f"{index}. {habit.name}")
 
     #Asks the user to enter the number of the habit they wish to see the longest streak for
     typer.echo("")
-    entered_number = typer.prompt("Please enter the number of the habit you wish to see the longest for, e.g., '1'")
+    entered_number = typer.prompt("Please enter the number of the habit you wish to see the longest streak for, e.g., '1'")
 
     #Checks if the users input is an integer
     try:
@@ -315,13 +318,14 @@ def analytics_menu():
         typer.echo("")
         typer.echo("")
         choice = typer.prompt("Please choose an option: (e.g., type '1' to list all habits)")
+        typer.echo("")
 
         if choice == "1":
             list_habits() 
         elif choice == "2":
             list_habits_with_given_periodicity()
         elif choice == "3":
-            random_assignment = 1 
+            longest_streak_for_habit()
         elif choice == "4":
             random_assignment = 1 
         elif choice == "5":
