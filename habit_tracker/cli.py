@@ -1,10 +1,11 @@
 import typer
+from pathlib import Path
+
 from habit_tracker.analytics import list_all_habits, list_all_habits_with_given_periodicity, list_longest_streak_for_given_habit, list_longest_streak_for_given_habit, return_longest_streak_of_all_habits
 from habit_tracker.habit import Habit
 from habit_tracker.storage import add_completion, delete_habit, initialise_database, load_habits, save_habit
 
-DATABASE_NAME = "habits.db" 
-
+DATABASE_NAME = Path(__file__).resolve().parent.parent / "habits.db"
 
 # The name of the database file where habits and their completions are stored.
 app = typer.Typer()
@@ -40,8 +41,9 @@ def add_habit():
 
     #Asks the user for the name of the habit and the periodicity
     typer.echo("")
-    habit_name = typer.prompt("Please enter the name of the habit:")
-    habit_periodicity = typer.prompt("Please enter the periodicity of the habit (daily/weekly):")
+    habit_name = typer.prompt("Please enter the name of the habit")
+    typer.echo("")
+    habit_periodicity = typer.prompt("Please enter the periodicity of the habit (daily/weekly)")
 
     #Loads the currently tracked habits from the database
     habits = load_habits(DATABASE_NAME)
@@ -49,6 +51,7 @@ def add_habit():
     #This for loop iterates through each of the habits loaded from the database and checks if the habit name provided by the customer already exists
     for habit in habits:
         if habit.name == habit_name:
+            typer.echo("")
             typer.echo(f"Habit already exists: {habit_name}")
             return
         
@@ -63,6 +66,7 @@ def add_habit():
     save_habit(habit_to_save, DATABASE_NAME)
 
     #Shows confirmation message to the user
+    typer.echo("")
     typer.echo(f"Habit added: {habit_name} ({habit_periodicity})")
     
 @app.command()
@@ -80,6 +84,8 @@ def complete_habit():
         return
 
     #Prints the name and periodicity of each habit in the database, numbered in a list format.
+    typer.echo("")
+    typer.echo("Currently tracked habits")
     for index, habit in enumerate(habits, start=1):
         typer.echo(f"{index}. {habit.name} ({habit.periodicity})")
 
@@ -106,6 +112,7 @@ def complete_habit():
     add_completion(selected_habit.id, database_name=DATABASE_NAME)
 
     #Lets the user that the habit has been marked complete
+    typer.echo("")
     typer.echo(f"Marked complete: {selected_habit.name}")
 
 @app.command()
@@ -123,6 +130,7 @@ def delete_a_habit():
         return
 
     #Prints the name and periodicity of each habit in the database, numbered in a list format.
+    typer.echo("")
     for index, habit in enumerate(habits, start=1):
         typer.echo(f"{index}. {habit.name} ({habit.periodicity})")
 
@@ -148,7 +156,10 @@ def delete_a_habit():
     selected_habit = habits[selected_number - 1]
 
     #Asks the user if they are sure they want to delete the given habit, and assigns the user's input to the variable certainty
+    typer.echo("")
     certainty = typer.prompt(f"Are you sure you want to delete {selected_habit.name}? this cannot be undone. type: y/n").lower()
+    typer.echo("")
+
 
     #If loop which deals with the user's input
     if certainty == "y":
