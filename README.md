@@ -70,7 +70,7 @@ Follow the on screen commands. Type the number for the command you wish to execu
 
 ###  Analytics menu
 
-Follow the on screen commands. Type the humber for the command you wish to execute and hit enter.
+Follow the on screen commands. Type the number for the command you wish to execute and hit enter.
 
 1) List all currently tracked habits
 2) List all habits with a given periodicity
@@ -80,7 +80,7 @@ Follow the on screen commands. Type the humber for the command you wish to execu
 
 ##  Run the tests
 
-To execute suite of tests, from the project root run `pytest`
+To execute the suite of tests, from the project root run `pytest`
 
 ##  Database
 
