@@ -92,3 +92,19 @@ The database contains two tables:
   2)  **Completions**, which stored dates when each habit was completed.
 
 The database file is excluded from Git so that each user can create and manage their own local data. The application will automatically create a new database either when the user seeds the example data, or when they add a habit for the first time.
+
+## Example walkthrough - Creating a new habit
+
+To create a new habit: 
+
+ 1) First run the application:
+
+`python -m habit_tracker.cli main-menu`
+
+2) Next type `2` and hit `Enter`
+
+3) Input the name of the habit you wish to create, e.g., `drink water`, then hit `Enter`
+
+4) Input the periodicity of the habit you are creating, either `daily` or `weekly` and hit `Enter`
+
+You will see a confirmation message that your habit has been created.
